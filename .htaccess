@@ -1,0 +1,8 @@
+Options All -Indexes
+
+<Files .htaccess>
+order allow,deny
+deny from all
+</Files>
+RewriteEngine On
+RewriteRule . index.php

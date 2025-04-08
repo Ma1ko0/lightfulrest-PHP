@@ -1,0 +1,3 @@
+logs/*
+mariadb_data/*
+.vscode

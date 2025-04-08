@@ -1,0 +1,68 @@
+version: '3.7'
+
+volumes:
+    # mariadb_data:
+    #     driver: local
+    logs:
+        driver: local
+
+services:
+    api:
+        build: 
+            context: .  # Use the current directory
+            dockerfile: Dockerfile.api  # Specify which Dockerfile to use
+        container_name: api
+        working_dir: /var/www
+        command: php -S 0.0.0.0:8080
+        environment:
+            docker: "true"
+            DB_HOST: ${DB_HOST}
+            DB_NAME: ${DB_NAME}
+            DB_USER: ${DB_USER}
+            DB_PASSWORD: ${DB_PASSWORD}
+        ports:
+            - "8080:8080"
+        volumes:
+            - .:/var/www
+            - ./logs:/var/www/logs
+        networks:
+            - web
+        depends_on:
+            - mydb
+        restart: always
+
+    mydb:
+        container_name: mydb
+        hostname: mydb
+        image: mariadb:latest
+        restart: always
+        networks:
+            - web
+        ports:
+            - '3306:3306'
+        expose:
+            - '3306'
+        environment:
+            MYSQL_DATABASE: ${DB_NAME}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_TCP_PORT: 3306
+            MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+        volumes:
+            # - mariadb_data:/var/lib/mysql
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Ensures init script runs correctly
+
+    phpmyadmin:
+        image: phpmyadmin:5.2.2
+        restart: always
+        ports:
+            - 127.0.0.1:9090:80  # Restricts phpMyAdmin access to localhost only
+        networks:
+            - web
+        environment:
+            PMA_HOST: ${DB_HOST}
+            PMA_USER: ${DB_USER}
+            PMA_PASSWORD: ${DB_PASSWORD}
+ 
+networks:
+    web:
+        driver: bridge
