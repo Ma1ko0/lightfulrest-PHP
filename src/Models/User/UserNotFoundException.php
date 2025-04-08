@@ -8,5 +8,5 @@ use Exception;
 
 class UserNotFoundException extends Exception
 {
-    public $message = 'The user you requested does not exist.';
+	public $message = 'The user you requested does not exist.';
 }

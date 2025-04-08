@@ -5,18 +5,22 @@ namespace App;
 abstract class Controller
 {
 	private readonly string $method;
+
 	private array $uriParts;
+
 	public function __construct(string $method, array $uriParts)
 	{
 		$this->method = $method;
 		$this->uriParts = $uriParts;
 	}
+
 	abstract public function processRequest(): void;
 
 	public function shiftUriParts()
 	{
 		array_shift($this->uriParts);
 	}
+
 	/**
 	 * Get the value of uriParts
 	 */
@@ -56,6 +60,7 @@ abstract class Controller
 
 		return $this;
 	}
+
 	/**
 	 * Deletes a directory and all its contents
 	 *

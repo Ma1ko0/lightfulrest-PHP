@@ -10,6 +10,7 @@ use Repository;
 class UserRepository extends Repository
 {
 	private PDO $databaseConnection;
+
 	public function __construct()
 	{
 		$this->databaseConnection = self::getConnection();
