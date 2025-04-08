@@ -6,7 +6,7 @@ namespace App\Middleware;
 class AuthMiddleware
 {
 
-	public static function checkAuth()
+	public static function checkAuth(): ?bool
 	{
 		// Check if the user is authenticated
 		// This is a simple example, you might want to check a session or a token instead

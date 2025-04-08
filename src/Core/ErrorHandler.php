@@ -4,46 +4,71 @@ namespace App;
 
 class ErrorHandler
 {
-	// error handler function
-	public static function handleError($errno, $errstr, $errfile, $errline) {
+
+	private static bool $debug = false;
+
+	public static function handleError(
+		int $errno,
+		string $errstr,
+		string $errfile,
+		int $errline
+	): bool {
+		// Skip if error reporting doesn't include this error type
 		if (!(error_reporting() & $errno)) {
 			return false;
 		}
 
-		$bt = debug_backtrace();
-		$debug = array_shift($bt);
+		// Try to get deeper stack trace info (optional)
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+		$contextFile = $trace[1]['file'] ?? $errfile;
+		$contextLine = $trace[1]['line'] ?? $errline;
 
-		if (!isset($debug["line"])) {
-			$debug["line"] = $errline;
-			$debug["file"] = $errfile;
-		}
+		// Prepare log message
+		$logMessage = sprintf(
+			"[%d] %s (Line %d in File %s)",
+			$errno,
+			$errstr,
+			$contextLine,
+			$contextFile
+		);
 
+		// Decide based on severity
 		switch ($errno) {
 			case E_USER_ERROR:
 			case E_ERROR:
-				$out = "ERROR [$errno] $errstr\n
-							Error in File $errfile in Line $errline,
-							PHP " . PHP_VERSION . " (" . PHP_OS . ")\n
-							";
-				Logger::logging("[$errno] $errstr  - Error in File $errfile in Line $errline", ERROR);
-				echo $out;
+				Logger::logging($logMessage, ERROR);
+				self::outputIfNotProd("ERROR", $logMessage);
 				exit(1);
+
 			case E_USER_WARNING:
 			case E_WARNING:
-				$out = "WARNING [$errno] $errstr (Line " . $debug["line"] . " in File " . $debug["file"] . ")\n\n";
-				Logger::logging("[$errno] $errstr (Line " . $debug["line"] . " in File " . $debug["file"] . ")", WARN);
+				Logger::logging($logMessage, WARN);
+				self::outputIfNotProd("WARNING", $logMessage);
 				break;
+
 			case E_USER_NOTICE:
 			case E_NOTICE:
-				$out = "NOTICE [$errno] $errstr (Line " . $debug["line"] . " in File " . $debug["file"] . ")\n\n";
-				Logger::logging("[$errno] $errstr (Line " . $debug["line"] . " in File " . $debug["file"] . ")", INFO);
+				Logger::logging($logMessage, INFO);
+				self::outputIfNotProd("NOTICE", $logMessage);
 				break;
+
 			default:
-				$out = "Unknown error type: [$errno] $errstr\n\n";
 				Logger::logging("[$errno] $errstr - Unknown error type", WARN);
-				break;
+				self::outputIfNotProd("UNKNOWN", $logMessage);
 		}
+
 		http_response_code(500);
 		return true;
+	}
+
+	private static function outputIfNotProd(string $level, string $message): void
+	{
+		if (self::$debug) {
+			echo sprintf("%s: %s\n", $level, $message);
+		}
+	}
+
+	public static function setDebug(bool $debug) {
+		self::$debug = $debug;
 	}
 }

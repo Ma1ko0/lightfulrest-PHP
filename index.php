@@ -33,11 +33,11 @@ define("NONE", 1);
 define("ERROR", 2);
 define("WARN", 4);
 define("INFO", 8);
-global $logginglevel;
 
 session_start();
-$logginglevel = ERROR | WARN;
+Logger::setLevel(ERROR | WARN);
 error_reporting(E_ALL);
+ErrorHandler::setDebug(true);
 
 set_error_handler("App\\ErrorHandler::handleError");
 

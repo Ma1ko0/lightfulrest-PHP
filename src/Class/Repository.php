@@ -14,7 +14,7 @@ class Repository
 	protected static $dbUser;
 	protected static $dbPassword;
 
-	public static function init()
+	public static function init(): void
 	{
 		// Setze die Umgebungsvariablen
 		self::$dbHost = getenv('DB_HOST') ?: 'localhost';  // Fallback auf 'localhost', wenn nicht gesetzt

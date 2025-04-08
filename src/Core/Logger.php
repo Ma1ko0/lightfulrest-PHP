@@ -4,52 +4,52 @@ namespace App;
 
 class Logger
 {
-	/**
-	 * logging
-	 *
-	 * @param string $message
-	 * @param int $type
-	 * @param boolean $backtrace
-	 */
-	public static function logging($message, $type = ERROR, $backtrace = false) {
-		global $logginglevel;
+	private static int $level = ERROR | WARN | INFO;
 
-		if ($logginglevel & $type === 0) {
+	public static function setLevel(int $level): void
+	{
+		self::$level = $level;
+	}
+
+	public static function logging(string $message, int $type = ERROR, bool $backtrace = false): void
+	{
+		if ((self::$level & $type) === 0) {
 			return;
 		}
 
-		switch ($type) {
-			case ERROR:
-				$typ = "ERROR";
-				break;
-			case WARN:
-				$typ = "WARN";
-				break;
-			case INFO:
-				$typ = "INFO";
-				break;
-			default:
-				$typ = "UNKNOWN";
-		}
+		$typeStr = match ($type) {
+			ERROR => 'ERROR',
+			WARN  => 'WARN',
+			INFO  => 'INFO',
+			default => 'UNKNOWN'
+		};
 
-		$message = str_replace("\r\n", " ", $message);
-		$line = date("Y.m.d H:i:s") . "\t" . $typ . "\t" . session_id() . "\t" . $message;
+		$message = str_replace(["\r\n", "\n"], ' ', $message);
+		$session = session_status() === PHP_SESSION_ACTIVE ? session_id() : '-';
+
+		$line = sprintf(
+			"%s\t%s\t%s\t%s",
+			date("Y.m.d H:i:s"),
+			$typeStr,
+			$session,
+			$message
+		);
 
 		if ($backtrace) {
-			$trace = debug_backtrace();
-			$datei = $trace[0]["file"];
-			$zeile = $trace[0]["line"];
-			$line .= "\t" . $datei . ":" . $zeile;
+			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+			$line .= sprintf("\t%s:%d", $trace["file"], $trace["line"]);
 		}
 
-		$loggingfile = __DIR__ . "/../../logs/" . date("Y/Ymd") . ".log";
+		$logFile = self::getLogFilePath();
+		file_put_contents($logFile, $line . PHP_EOL, FILE_APPEND | LOCK_EX);
+	}
 
-		// create folder
-		$folder = dirname($loggingfile);
-
+	private static function getLogFilePath(): string
+	{
+		$folder = __DIR__ . '/../../logs';
 		if (!is_dir($folder)) {
 			mkdir($folder, 0777, true);
 		}
-		file_put_contents($loggingfile, $line . "\r\n", FILE_APPEND | LOCK_EX);
+		return $folder . '/' . date('Y-m-d') . '.log';
 	}
 }

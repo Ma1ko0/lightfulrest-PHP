@@ -4,82 +4,90 @@ namespace App;
 
 abstract class Controller
 {
-	private readonly string $method;
+    private readonly string $method;
+    private array $uriParts;
 
-	private array $uriParts;
+    public function __construct(string $method, array $uriParts)
+    {
+        $this->method = $method;
+        $this->uriParts = $uriParts;
+    }
 
-	public function __construct(string $method, array $uriParts)
-	{
-		$this->method = $method;
-		$this->uriParts = $uriParts;
-	}
+    abstract public function processRequest(): void;
 
-	abstract public function processRequest(): void;
+    public function shiftUriParts(): void
+    {
+        array_shift($this->uriParts);
+    }
 
-	public function shiftUriParts()
-	{
-		array_shift($this->uriParts);
-	}
+    /**
+     * Get the URI parts
+     *
+     * @return array
+     */
+    public function getUriParts(): array
+    {
+        return $this->uriParts;
+    }
 
-	/**
-	 * Get the value of uriParts
-	 */
-	public function getUriParts()
-	{
-		return $this->uriParts;
-	}
+    /**
+     * Set the URI parts
+     *
+     * @param array $uriParts
+     * @return self
+     */
+    public function setUriParts(array $uriParts): self
+    {
+        $this->uriParts = $uriParts;
+        return $this;
+    }
 
-	/**
-	 * Set the value of uriParts
-	 *
-	 * @return  self
-	 */
-	public function setUriParts($uriParts)
-	{
-		$this->uriParts = $uriParts;
+    /**
+     * Get the HTTP method
+     *
+     * @return string
+     */
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
 
-		return $this;
-	}
+    /**
+     * Set the HTTP method
+     *
+     * @param string $method
+     * @return self
+     */
+    public function setMethod(string $method): self
+    {
+        $this->method = $method;
+        return $this;
+    }
 
-	/**
-	 * Get the value of method
-	 */
-	public function getMethod()
-	{
-		return $this->method;
-	}
+    /**
+     * Recursively delete a directory and its contents
+     *
+     * @param string $target Path to file or directory
+     * @return void
+     */
+    public function deleteDirectory(string $target): void
+    {
+        if (in_array(basename($target), ['.', '..'], true)) {
+            return;
+        }
 
-	/**
-	 * Set the value of method
-	 *
-	 * @return  self
-	 */
-	public function setMethod($method)
-	{
-		$this->method = $method;
+        if (is_file($target)) {
+            unlink($target);
+            return;
+        }
 
-		return $this;
-	}
+        $objectsToDelete = scandir($target) ?: [];
+        foreach ($objectsToDelete as $object) {
+            if ($object !== '.' && $object !== '..') {
+                $this->deleteDirectory($target . DIRECTORY_SEPARATOR . $object);
+            }
+        }
 
-	/**
-	 * Deletes a directory and all its contents
-	 *
-	 * @param string $target The File/Folder to delete
-	 * @return void
-	 */
-	public function deleteDirectory($target)
-	{
-		if (basename($target) === "." || basename($target) === "..") {
-			return;
-		}
-		if (is_file($target)) {
-			unlink($target);
-			return;
-		}
-		$objectsToDelete = scandir($target);
-		foreach ($objectsToDelete as $object) {
-			$this->deleteDirectory($target . "/" . $object);
-		}
-		rmdir($target);
-	}
+        rmdir($target);
+    }
 }
