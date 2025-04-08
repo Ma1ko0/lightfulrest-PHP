@@ -30,7 +30,7 @@ If you need a lightweight foundation to build your project, this framework will 
 
 Clone the repository to your local machine:
 ```bash
-git clone https://github.com/kakajks/LightfulRest.git
+git clone https://github.com/Ma1ko0/lightfulrest-PHP.git
 ```
 
 ### 2. Set up the environment
