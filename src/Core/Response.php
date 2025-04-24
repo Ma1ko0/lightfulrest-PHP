@@ -9,11 +9,11 @@ class Response
 	/**
 	 * Send a JSON response with the given data and status code.
 	 *
-	 * @param array $data The data to be sent in the response.
+	 * @param mixed $data The data to be sent in the response.
 	 * @param integer $statusCode The HTTP status code to be sent with the response.
 	 * @return void
 	 */
-	public static function json(array $data, int $statusCode = 200): void
+	public static function json(mixed $data, int $statusCode = 200): void
 	{
 		header("Content-Type: application/json; charset=UTF-8");
 		http_response_code($statusCode);

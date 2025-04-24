@@ -15,7 +15,7 @@ class InputController extends Controller
 		
 		if ($method === "GET") {
 			switch (strtolower($this->getUriParts()[0])) {
-				case "Users":
+				case "users":
 					$this->shiftUriParts();
 					if (empty($this->getUriParts())) {
 						Response::error("User ID is required", 400);
@@ -24,10 +24,11 @@ class InputController extends Controller
 					$userId = $this->getUriParts()[0];
 					$user = $userrepo->getUserById($userId);
 					if (empty($user)) {
+						Logger::logging("User not found", ERROR);
 						Response::error("User not found", 404);
 					}
 					Logger::logging("User found", INFO);
-					Response::json($user[0], 200);
+					Response::json($user->getUsername(), 200);
 				default:
 					break;
 			}
