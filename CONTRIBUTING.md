@@ -1,5 +1,3 @@
-Haha, got it—let’s dial it back to something more neutral and professional, but still chill and appropriate for a solo hobby project. Here’s a more “normal” version of the **Contributing Guidelines**:
-
 # Contributing Guidelines
 
 Thanks for your interest in this project! It's currently a personal side project maintained by a solo developer, so things may be a bit informal, but contributions are still very welcome.
