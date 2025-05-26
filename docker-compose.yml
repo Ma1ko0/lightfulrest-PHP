@@ -20,6 +20,9 @@ services:
             DB_NAME: ${DB_NAME}
             DB_USER: ${DB_USER}
             DB_PASSWORD: ${DB_PASSWORD}
+            DEBUG_MODE: ${DEBUG_MODE}
+            TIMEZONE: ${TIMEZONE}
+            LOCALE: ${LOCALE}
         ports:
             - "8080:8080"
         volumes:
