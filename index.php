@@ -40,12 +40,12 @@ define("INFO", 8);
 session_start();
 Logger::setLevel(ERROR | WARN);
 error_reporting(E_ALL);
-ErrorHandler::setDebug(true);
+ErrorHandler::setDebug($_ENV["DEBUG_MODE"]);
 
 set_error_handler("App\\ErrorHandler::handleError");
 
-date_default_timezone_set("Europe/Berlin");
-setlocale(LC_ALL, strtoupper(substr(PHP_OS, 0, 3)) === "WIN" ? "german" : "de_DE");
+date_default_timezone_set($_ENV["TIMEZONE"]);
+setlocale(LC_ALL, $_ENV["LOCALE"]);
 
 $fileName = "/" . basename(__FILE__);
 if (strpos($_SERVER["REQUEST_URI"], $fileName) === 0) {
