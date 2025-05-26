@@ -20,6 +20,9 @@ spl_autoload_register(function ($class) {
 	if (is_file(__DIR__ . "/src/Controller/$class.php")) {
 		require_once __DIR__ . "/src/Controller/$class.php";
 	}
+	if (is_file(__DIR__ . "/src/Enums/$class.php")) {
+		require_once __DIR__ . "/src/Enums/$class.php";
+	}
 	$models = array_slice(scandir(__DIR__ . "/src/Models"), 2);
 	foreach ($models as $model) {
 		// var_dump(__DIR__ . "/src/Models/$model/$class.php");

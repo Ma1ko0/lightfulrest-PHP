@@ -2,14 +2,17 @@
 
 namespace App;
 
+use Methods;
+
 abstract class Controller
 {
-    private readonly string $method;
+    private readonly Methods $method;
     private array $uriParts;
 
     public function __construct(string $method, array $uriParts)
     {
-        $this->method = $method;
+        $method = strtoupper($method);
+        $this->method = Methods::from($method) ?? Methods::UNKNOWN;
         $this->uriParts = $uriParts;
     }
 
@@ -47,7 +50,7 @@ abstract class Controller
      *
      * @return string
      */
-    public function getMethod(): string
+    public function getMethod(): Methods
     {
         return $this->method;
     }
@@ -55,10 +58,10 @@ abstract class Controller
     /**
      * Set the HTTP method
      *
-     * @param string $method
+     * @param Methods $method
      * @return self
      */
-    public function setMethod(string $method): self
+    public function setMethod(Methods $method): self
     {
         $this->method = $method;
         return $this;

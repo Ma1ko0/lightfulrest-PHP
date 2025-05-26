@@ -3,6 +3,7 @@
 namespace App;
 
 use App\User\UserRepository;
+use Methods;
 
 class InputController extends Controller
 {
@@ -13,7 +14,7 @@ class InputController extends Controller
 	public function processRequest(): void {
 		$method = $this->getMethod();
 		
-		if ($method === "GET") {
+		if ($method === Methods::GET) {
 			switch (strtolower($this->getUriParts()[0])) {
 				case "users":
 					$this->shiftUriParts();
@@ -34,7 +35,7 @@ class InputController extends Controller
 			}
 			
 		}
-		if ($method === "POST") {
+		if ($method === Methods::POST) {
 		}
 		Response::error("Method not allowed", 405);
 	}
