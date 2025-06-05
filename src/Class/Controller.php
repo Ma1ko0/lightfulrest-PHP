@@ -32,7 +32,43 @@ abstract class Controller
     {
         return $this->uriParts;
     }
-
+    /**
+     * Get the first part of the URI
+     *
+     * @return string|null
+     */
+    public function getFirstUriPart(): ?string
+    {
+        return $this->uriParts[0] ?? null;
+    }
+    /**
+     * Get the last part of the URI
+     *
+     * @return string|null
+     */
+    public function getLastUriPart(): ?string
+    {
+        return end($this->uriParts) ?: null;
+    }
+    /**
+     * Get the URI part at the specified index
+     *
+     * @param int $index
+     * @return string|null
+     */
+    public function getUriPart(int $index): ?string
+    {
+        return $this->uriParts[$index] ?? null;
+    }
+    /**
+     * Get the size of the URI parts
+     *
+     * @return int
+     */
+    public function getUriSize(): int
+    {
+        return count($this->uriParts);
+    }
     /**
      * Set the URI parts
      *

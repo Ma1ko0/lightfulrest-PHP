@@ -15,14 +15,14 @@ class InputController extends Controller
 		$method = $this->getMethod();
 		
 		if ($method === Methods::GET) {
-			switch (strtolower($this->getUriParts()[0])) {
+			switch (strtolower($this->getFirstUriPart())) {
 				case "users":
 					$this->shiftUriParts();
-					if (empty($this->getUriParts())) {
+					if ($this->getUriSize() !== 1) {
 						Response::error("User ID is required", 400);
 					}
 					$userrepo = new UserRepository();
-					$userId = $this->getUriParts()[0];
+					$userId = $this->getFirstUriPart();
 					$user = $userrepo->getUserById($userId);
 					if (empty($user)) {
 						Logger::logging("User not found", ERROR);
