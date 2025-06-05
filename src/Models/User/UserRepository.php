@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\User;
 
+use App\DatabaseQueryBuilder;
 use PDO;
 use Repository;
 
@@ -34,13 +35,11 @@ class UserRepository extends Repository
 			throw new \InvalidArgumentException("User ID contains invalid characters");
 		}
 		$table = self::TABLENAME_USER;
-		$query = <<<SQL
-			SELECT * FROM {$table} WHERE id = ?
-		SQL;
-		$stmt = $this->databaseConnection->prepare($query);
-		$stmt->execute([$userId]);
-		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+		$result = (new DatabaseQueryBuilder($this->databaseConnection))
+			->select()
+			->table($table)
+			->where("id", "=", $userId)
+			->get();
 		if (sizeof($result) != 1) {
 			throw new UserNotFoundException();
 		}
