@@ -40,7 +40,7 @@ define("INFO", 8);
 session_start();
 Logger::setLevel(ERROR | WARN);
 error_reporting(E_ALL);
-ErrorHandler::setDebug($_ENV["DEBUG_MODE"]);
+ErrorHandler::setDebug(boolval($_ENV["DEBUG_MODE"]));
 
 set_error_handler("App\\ErrorHandler::handleError");
 
