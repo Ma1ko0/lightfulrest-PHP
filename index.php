@@ -43,6 +43,7 @@ error_reporting(E_ALL);
 ErrorHandler::setDebug(boolval($_ENV["DEBUG_MODE"]));
 
 set_error_handler("App\\ErrorHandler::handleError");
+set_exception_handler("APP\\ErrorHandler::handleUncaughtExceptions");
 
 date_default_timezone_set($_ENV["TIMEZONE"]);
 setlocale(LC_ALL, $_ENV["LOCALE"]);
