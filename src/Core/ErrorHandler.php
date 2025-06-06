@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Throwable;
+
 class ErrorHandler
 {
 
@@ -61,6 +63,12 @@ class ErrorHandler
 		return true;
 	}
 
+	public static function handleUncaughtExceptions(Throwable $exception)
+	{
+		Logger::logging("An uncaught " . get_class($exception) . " was found! " . $exception->getCode() . ": " . $exception->getMessage(), ERROR);
+		self::outputIfNotProd("ERROR", $exception->getMessage());
+		Response::error("Unknown Error occurred!", 500);
+	}
 	private static function outputIfNotProd(string $level, string $message): void
 	{
 		if (self::$debug) {
@@ -68,7 +76,8 @@ class ErrorHandler
 		}
 	}
 
-	public static function setDebug(bool $debug) {
+	public static function setDebug(bool $debug)
+	{
 		self::$debug = $debug;
 	}
 }
