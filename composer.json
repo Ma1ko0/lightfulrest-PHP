@@ -1,0 +1,8 @@
+{
+    "name": "ma1ko0/lightfulrest-php",
+    "description": "This project is an ultra-lightweight PHP framework designed to provide only the essential building blocks for web applications. It serves as an alternative to heavier frameworks by focusing on simplicity and minimalism, giving developers just enough to build web applications without unnecessary complexity",
+    "license": "proprietary",
+    "require-dev": {
+        "phpunit/phpunit": "^12.2"
+    }
+}

@@ -16,8 +16,8 @@ class Repository
 
 	public static function init(): void
 	{
-		// Setze die Umgebungsvariablen
-		self::$dbHost = getenv('DB_HOST') ?: 'localhost';  // Fallback auf 'localhost', wenn nicht gesetzt
+		// Set Env variables
+		self::$dbHost = getenv('DB_HOST') ?: 'localhost';  // Fallback to 'localhost', if not set
 		self::$dbName = getenv('DB_NAME') ?: 'mydatabase';
 		self::$dbUser = getenv('DB_USER') ?: 'root';
 		self::$dbPassword = getenv('DB_PASSWORD') ?: '12345678';
@@ -25,7 +25,7 @@ class Repository
 
 	public static function getConnection(): ?PDO
 	{
-		// Stelle sicher, dass init() vorher aufgerufen wurde
+		// Secure init() was called beforehand
 		if (!isset(self::$dbHost)) {
 			self::init();
 		}

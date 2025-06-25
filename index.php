@@ -32,11 +32,6 @@ spl_autoload_register(function ($class) {
 	}
 });
 
-define("NONE", 1);
-define("ERROR", 2);
-define("WARN", 4);
-define("INFO", 8);
-
 session_start();
 Logger::setLevel(ERROR | WARN);
 error_reporting(E_ALL);

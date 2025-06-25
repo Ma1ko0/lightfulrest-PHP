@@ -92,18 +92,6 @@ abstract class Controller
     }
 
     /**
-     * Set the HTTP method
-     *
-     * @param Methods $method
-     * @return self
-     */
-    public function setMethod(Methods $method): self
-    {
-        $this->method = $method;
-        return $this;
-    }
-
-    /**
      * Recursively delete a directory and its contents
      *
      * @param string $target Path to file or directory
