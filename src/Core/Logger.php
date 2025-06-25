@@ -21,6 +21,7 @@ class Logger
 			ERROR => 'ERROR',
 			WARN  => 'WARN',
 			INFO  => 'INFO',
+			DEBUG => 'DEBUG',
 			default => 'UNKNOWN'
 		};
 
@@ -51,5 +52,25 @@ class Logger
 			mkdir($folder, 0777, true);
 		}
 		return $folder . '/' . date('Y-m-d') . '.log';
+	}
+
+	public static function parseLogLevel(string $logLevelString): int
+	{
+		$map = [
+			'ERROR' => ERROR,
+			'WARN'  => WARN,
+			'INFO'  => INFO,
+			'DEBUG' => DEBUG,
+			'NONE' => NONE,
+		];
+
+		$levels = explode(",", strtoupper($logLevelString));
+		$bitmask = 0;
+
+		foreach ($levels as $level) {
+			$bitmask |= $map[trim($level)] ?? 0;
+		}
+
+		return $bitmask;
 	}
 }
