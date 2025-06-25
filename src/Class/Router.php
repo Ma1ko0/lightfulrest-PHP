@@ -33,7 +33,7 @@ class Router {
 	 *
 	 * @param string|Methods $method
 	 * @param string $uri
-	 * @return void
+	 * @return mixed
 	 */
 	public function dispatch(string|Methods $method, string $uri) {
 		if (gettype($method) !== "object") {

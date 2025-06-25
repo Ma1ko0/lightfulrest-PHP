@@ -69,6 +69,7 @@ class ErrorHandler
 		self::outputIfNotProd("ERROR", $exception->getMessage());
 		Response::error("Unknown Exception occurred! Exception Type: " . $exception::class, 500);
 	}
+
 	private static function outputIfNotProd(string $level, string $message): void
 	{
 		if (self::$debug) {
