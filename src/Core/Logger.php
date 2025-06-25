@@ -2,8 +2,14 @@
 
 namespace App;
 
+if (!defined("NONE")) define("NONE", 1);
+if (!defined("ERROR")) define("ERROR", 2);
+if (!defined("WARN")) define("WARN", 4);
+if (!defined("INFO")) define("INFO", 8);
+
 class Logger
 {
+	private static string $logDir = __DIR__ . '/../../logs';
 	private static int $level = ERROR | WARN | INFO;
 
 	public static function setLevel(int $level): void
@@ -41,17 +47,20 @@ class Logger
 			$line .= sprintf("\t%s:%d", $trace["file"], $trace["line"]);
 		}
 
-		$logFile = self::getLogFilePath();
+		$logFile = static::getLogFilePath();
 		file_put_contents($logFile, $line . PHP_EOL, FILE_APPEND | LOCK_EX);
 	}
 
-	private static function getLogFilePath(): string
+	public static function setLogDirectory(string $dir): void
 	{
-		$folder = __DIR__ . '/../../logs';
-		if (!is_dir($folder)) {
-			mkdir($folder, 0777, true);
+		self::$logDir = $dir;
+	}
+	public static function getLogFilePath(): string
+	{
+		if (!is_dir(self::$logDir)) {
+			mkdir(self::$logDir, 0777, true);
 		}
-		return $folder . '/' . date('Y-m-d') . '.log';
+		return self::$logDir . '/' . date('Y-m-d') . '.log';
 	}
 
 	public static function parseLogLevel(string $logLevelString): int

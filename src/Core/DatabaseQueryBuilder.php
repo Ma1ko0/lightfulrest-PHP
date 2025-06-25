@@ -2,7 +2,9 @@
 
 namespace App;
 
+use Exception;
 use PDO;
+use PDOException;
 
 class DatabaseQueryBuilder
 {
@@ -379,6 +381,11 @@ class DatabaseQueryBuilder
 	{
 		$sql = $this->getSQL();
 		$stmt = $this->databaseConnection->prepare($sql);
+		
+		if ($stmt === false) {
+			$errorInfo = $this->databaseConnection->errorInfo();
+			throw new PDOException("Could not prepare SQL statement! Error: " . json_encode($errorInfo));
+		}
 		foreach ($this->bindings as $param => $value) {
 			$stmt->bindValue($param, $value);
 		}
@@ -398,6 +405,10 @@ class DatabaseQueryBuilder
 	{
 		$sql = $this->getSQL();
 		$stmt = $this->databaseConnection->prepare($sql);
+		if ($stmt === false) {
+			$errorInfo = $this->databaseConnection->errorInfo();
+			throw new PDOException("Could not prepare SQL statement! Error: " . json_encode($errorInfo));
+		}
 		foreach ($this->bindings as $param => $value) {
 			$stmt->bindValue($param, $value);
 		}
