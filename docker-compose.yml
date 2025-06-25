@@ -23,6 +23,7 @@ services:
             DEBUG_MODE: ${DEBUG_MODE}
             TIMEZONE: ${TIMEZONE}
             LOCALE: ${LOCALE}
+            LOG_LEVEL: ${LOG_LEVEL}
         ports:
             - "8080:8080"
         volumes:

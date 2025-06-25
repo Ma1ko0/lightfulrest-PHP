@@ -36,9 +36,10 @@ define("NONE", 1);
 define("ERROR", 2);
 define("WARN", 4);
 define("INFO", 8);
+define("DEBUG", 16);
 
 session_start();
-Logger::setLevel(ERROR | WARN);
+Logger::setLevel(Logger::parseLogLevel($_ENV["LOG_LEVEL"]));
 error_reporting(E_ALL);
 ErrorHandler::setDebug(boolval($_ENV["DEBUG_MODE"]));
 
