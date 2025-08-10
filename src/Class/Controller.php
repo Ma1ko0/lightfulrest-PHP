@@ -9,13 +9,17 @@ abstract class Controller
     private readonly Methods $method;
     private array $uriParts;
 
-    public function __construct(string $method, array $uriParts)
+    public function __construct(string|Methods $method, array $uriParts)
     {
-        $method = strtoupper($method);
-        $this->method = Methods::from($method) ?? Methods::UNKNOWN;
+        if (gettype($method) === "string") {
+            $method = strtoupper($method);
+            $this->method = Methods::from($method) ?? Methods::UNKNOWN;
+        } else if (gettype($method) === "object" && get_class($method) === "Methods") {
+            $this->method = $method;
+        }
         $this->uriParts = $uriParts;
     }
-
+    
     abstract public function processRequest(): void;
 
     public function shiftUriParts(): void
