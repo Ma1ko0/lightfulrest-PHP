@@ -5,9 +5,9 @@ namespace App;
 use App\User\UserRepository;
 use Methods;
 
-class InputController extends Controller
+class UserController extends Controller
 {
-	public function __construct(string $method, array $uriParts) {
+	public function __construct(string|Methods $method, array $uriParts) {
 		parent::__construct($method, $uriParts);
 	}
 
@@ -16,7 +16,7 @@ class InputController extends Controller
 		
 		if ($method === Methods::GET) {
 			switch (strtolower($this->getFirstUriPart())) {
-				case "users":
+				case "data":
 					$this->shiftUriParts();
 					if ($this->getUriSize() !== 1) {
 						Response::error("User ID is required", 400);
@@ -33,7 +33,6 @@ class InputController extends Controller
 				default:
 					break;
 			}
-			
 		}
 		if ($method === Methods::POST) {
 		}

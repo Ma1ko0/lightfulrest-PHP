@@ -25,7 +25,6 @@ spl_autoload_register(function ($class) {
 	}
 	$models = array_slice(scandir(__DIR__ . "/src/Models"), 2);
 	foreach ($models as $model) {
-		// var_dump(__DIR__ . "/src/Models/$model/$class.php");
 		if (is_file(__DIR__ . "/src/Models/$model/$class.php")) {
 			require_once __DIR__ . "/src/Models/$model/$class.php";
 		}
@@ -65,5 +64,5 @@ if ($parts === null) {
 	http_response_code(404);
 	exit;
 }
-$controller = new InputController($_SERVER["REQUEST_METHOD"], $parts);
+$controller = new RoutingController($_SERVER["REQUEST_METHOD"], $parts);
 $controller->processRequest();
