@@ -48,21 +48,4 @@ set_exception_handler("APP\\ErrorHandler::handleUncaughtExceptions");
 date_default_timezone_set($_ENV["TIMEZONE"]);
 setlocale(LC_ALL, $_ENV["LOCALE"]);
 
-$fileName = "/" . basename(__FILE__);
-if (strpos($_SERVER["REQUEST_URI"], $fileName) === 0) {
-	$requestURI = substr($_SERVER["REQUEST_URI"], strlen($fileName));
-} else {
-	$requestURI = $_SERVER["REQUEST_URI"];
-}
-if (strpos($requestURI, "?") !== false) {
-	$requestURI = substr($requestURI, 0, strpos($requestURI, "?"));
-}
-$parts = explode("/", $requestURI);
-array_shift($parts);
-
-if ($parts === null) {
-	http_response_code(404);
-	exit;
-}
-$controller = new RoutingController($_SERVER["REQUEST_METHOD"], $parts);
-$controller->processRequest();
+include_once __DIR__ . "/src/Core/Routes.php";

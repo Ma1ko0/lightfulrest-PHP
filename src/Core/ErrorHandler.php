@@ -67,7 +67,7 @@ class ErrorHandler
 	{
 		Logger::logging("An uncaught " . get_class($exception) . " was found! " . $exception->getCode() . ": " . $exception->getMessage(), ERROR);
 		self::outputIfNotProd("ERROR", $exception->getMessage());
-		Response::error("Unknown Error occurred!", 500);
+		Response::error("Unknown Exception occurred! Exception Type: " . $exception::class, 500);
 	}
 	private static function outputIfNotProd(string $level, string $message): void
 	{

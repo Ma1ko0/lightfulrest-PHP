@@ -39,13 +39,13 @@ lightfulrest-PHP/
 ├── index.php                # Entry point, handles autoloading and request dispatch
 ├── .env.example             # Example environment configuration
 ├── src/
-│   ├── Class/               # Base classes (Controller, Repository, etc.)
-│   ├── Controller/          # Application controllers (e.g., InputController)
+│   ├── Class/               # Base classes (Controller, Repository, Router, etc.)
+│   ├── Controller/          # Application controllers (e.g., UserController)
 │   ├── Core/                # Core framework logic (Logger, ErrorHandler, QueryBuilder, etc.)
 │   ├── Enums/               # Enum definitions (e.g., HTTP methods)
-│   ├── Models/              # Data models and repositories
-│   │   └── User/            # Example user model and repository
-│   └── Middleware/          # (Optional) Middleware for request handling
+│   ├── Middleware/          # Middleware for request handling (e.g., AuthMiddleware)
+│   └── Models/              # Data models and repositories
+│       └── User/            # Example user model and repository
 └── ...
 ```
 
@@ -55,7 +55,6 @@ lightfulrest-PHP/
 
 ### 1. Clone the repository
 
-Clone the repository to your local machine:
 ```bash
 git clone https://github.com/Ma1ko0/lightfulrest-PHP.git
 cd lightfulrest-PHP
@@ -70,7 +69,7 @@ cp .env.example .env
 
 Update the `.env` file with your database details, such as:
 ```
-DB_HOST=localhost
+DB_HOST=mydb
 DB_NAME=mydatabase
 DB_USER=root
 DB_PASSWORD=12345678
@@ -104,30 +103,38 @@ This framework provides a basic structure for handling HTTP requests. Below are 
 
 ### Routing & Controllers
 
-Routing is handled by parsing the request URI and dispatching to the appropriate controller. You can add new controllers in `src/Controller/`.
+Routes are defined in [`src/Core/Routes.php`](src/Core/Routes.php). You can add new routes by calling the `$router->add()` method.
 
-**Example: Creating a New Controller**
+**Example: Adding a new route**
 
 ```php
-namespace App;
+// src/Core/Routes.php
 
-class ExampleController extends Controller
-{
-    public function __construct(string $method, array $uriParts) {
-        parent::__construct($method, $uriParts);
-    }
+use App\Router;
+use App\UserController;
 
-    public function processRequest(): void
-    {
-        if ($this->method === Methods::GET) {
-            Response::json("Hello World!", 200);
-        }
-        // Add more logic for POST, PUT, DELETE, etc.
-    }
-}
+$router = new Router();
+
+// Add a GET route for user data by ID
+$router->add(Methods::GET, '/users/(\d+)', [UserController::class, 'getUserDataByID']);
+
+// Add a custom route (example)
+$router->add(Methods::GET, '/hello', function() {
+    \App\Response::json(['message' => 'Hello, world!']);
+});
+
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$router->dispatch($_SERVER["REQUEST_METHOD"], $uri);
 ```
 
-To register a new route, update your routing logic in `index.php` or extend the dispatcher.
+- The first argument is the HTTP method (use the `Methods` enum).
+- The second argument is the route pattern (regex supported).
+- The third argument is either a `[ControllerClass::class, 'methodName']` array or a callable.
+
+**To add a new controller:**
+1. Create a new file in `src/Controller/`, e.g., `ExampleController.php`.
+2. Extend the `Controller` base class.
+3. Add your handler methods.
 
 ---
 
@@ -144,11 +151,9 @@ $user = $userRepo->getUserById($userId);
 if ($user) {
     Response::json($user->getUsername(), 200);
 } else {
-    Response::json("User not found", 404);
+    Response::error("User not found", 404);
 }
 ```
-
-You can extend the query builder for more complex queries.
 
 ---
 
@@ -159,7 +164,7 @@ Errors and exceptions are handled centrally. Logging is configurable via the `.e
 **Example: Logging an Event**
 
 ```php
-Logger::info("User login attempt", ["userId" => $userId]);
+Logger::logging("User login attempt", INFO);
 ```
 
 **Example: Handling an Error**
@@ -186,8 +191,8 @@ All sensitive and environment-specific settings are managed in the `.env` file. 
 ## Example Request Flow
 
 1. **Request**: User sends a GET request to `/users/1`.
-2. **Routing**: `index.php` parses the URI and dispatches to `InputController`.
-3. **Controller**: `InputController` calls `UserRepository` to fetch user data.
+2. **Routing**: `index.php` loads `src/Core/Routes.php`, which dispatches to `UserController`.
+3. **Controller**: `UserController` calls `UserRepository` to fetch user data.
 4. **Response**: Returns JSON with user information or error message.
 
 ---
@@ -215,4 +220,4 @@ Feel free to fork the repository and submit pull requests! Contributions are wel
 
 ## License
 
-This project is licensed under the MIT License - see the see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE).
