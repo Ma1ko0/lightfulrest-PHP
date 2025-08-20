@@ -40,7 +40,7 @@ define("DEBUG", 16);
 session_start();
 Logger::setLevel(Logger::parseLogLevel($_ENV["LOG_LEVEL"]));
 error_reporting(E_ALL);
-ErrorHandler::setDebug(boolval($_ENV["DEBUG_MODE"]));
+ErrorHandler::setDebug(filter_var($_ENV["DEBUG_MODE"], FILTER_VALIDATE_BOOLEAN));
 
 set_error_handler("App\\ErrorHandler::handleError");
 set_exception_handler("APP\\ErrorHandler::handleUncaughtExceptions");
