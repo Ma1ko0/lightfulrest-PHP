@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\User\UserNotFoundException;
 use App\User\UserRepository;
 use Methods;
 
@@ -9,8 +10,10 @@ class UserController extends Controller
 {
 	public function getUserDataByID($userId) {
 		$userrepo = new UserRepository();
-		$user = $userrepo->getUserById($userId);
-		if (empty($user)) {
+		$user = null;
+		try {
+			$user = $userrepo->getUserById($userId);
+		} catch (UserNotFoundException) {
 			Logger::logging("User not found", ERROR);
 			Response::error("User not found", 404);
 		}
