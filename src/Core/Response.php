@@ -53,7 +53,6 @@ class Response
 		echo json_encode($data);
 		exit;
 	}
-
 	/**
 	 * Send a Text/HTML response with the given data and status code.
 	 *
@@ -67,6 +66,20 @@ class Response
 		header("Content-Type: text/html; charset=UTF-8");
 		http_response_code($statusCode);
 		echo ($data);
+		exit;
+	}
+	/**
+	 * Send a redirect response to the specified URL.
+	 *
+	 * @param string $url The URL to redirect to.
+	 * @param integer $statusCode The HTTP status code for the redirect (301 for permanent, 302 for temporary).
+	 * @return void
+	 */
+	public static function redirect(string $url, int $statusCode = 302): void
+	{
+		Response::CorsHeader();
+		http_response_code($statusCode);
+		header("Location: $url");
 		exit;
 	}
 	/**
