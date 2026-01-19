@@ -24,6 +24,10 @@ services:
             TIMEZONE: ${TIMEZONE}
             LOCALE: ${LOCALE}
             LOG_LEVEL: ${LOG_LEVEL}
+            JWT_SECRET: ${JWT_SECRET}
+            JWT_ALGORITHM: ${JWT_ALGORITHM}
+            JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+            JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
         ports:
             - "8080:8080"
         volumes:

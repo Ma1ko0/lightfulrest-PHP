@@ -3,6 +3,7 @@
 namespace App;
 
 use Methods;
+use App\Request;
 
 class Router {
 	private array $routes = [];
@@ -31,15 +32,12 @@ class Router {
 	/**
 	 * Dispatches the request to the appropriate route handler
 	 *
-	 * @param string|Methods $method
-	 * @param string $uri
+	 * @param Request $request
 	 * @return mixed
 	 */
-	public function dispatch(string|Methods $method, string $uri) {
-		if (gettype($method) !== "object") {
-			$method = strtoupper($method);
-			$method = Methods::from($method) ?? Methods::UNKNOWN;
-		}
+	public function dispatch(Request $request) {
+		$method = $request->getMethod();
+		$uri = $request->getPath();
 		
 		foreach ($this->routes as $route) {
 			if ($route["method"] == $method && preg_match($route["pattern"], $uri, $matches)) {
@@ -50,10 +48,10 @@ class Router {
 					is_string($handler[0]) &&
 					is_string($handler[1])
 				) {
-					$useController = new $handler[0]($method, []);
+					$useController = new $handler[0]($request);
 					return call_user_func_array([$useController, $handler[1]], $matches);
 				}
-				return call_user_func_array($handler, $matches);
+				return call_user_func_array($handler, array_merge([$request], $matches));
 			}
 		}
 		Response::error("Route Not Found", 404);

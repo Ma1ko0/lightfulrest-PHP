@@ -1,3 +1,15 @@
 FROM php:8-alpine
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+
+# System dependencies for hashing + mysql
+RUN apk add --no-cache \
+    argon2-dev \
+    libsodium-dev \
+    openssl-dev \
+    curl \
+    git \
+    bash
+
+# PHP Extensions
+RUN docker-php-ext-install pdo pdo_mysql mysqli sodium
+
 WORKDIR /var/www

@@ -4,5 +4,8 @@
     "license": "proprietary",
     "require-dev": {
         "phpunit/phpunit": "^12.2"
+    },
+    "require": {
+        "firebase/php-jwt": "^7.0"
     }
 }
