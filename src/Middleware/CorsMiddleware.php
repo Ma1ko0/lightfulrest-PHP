@@ -1,22 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Middleware;
 
 use App\Request;
 use App\Response;
+use Middleware;
 
-class CorsMiddleware
+class CorsMiddleware extends Middleware
 {
-    public static function handle(Request $request, callable $next)
+    public function handle(Request $request, callable $next)
     {
         // Handle preflight OPTIONS request
         if ($request->getMethod()->value === 'OPTIONS') {
-            Response::empty();
+            new Response()->empty();
             return;
         }
-
-        // Set CORS headers
-        header('Access-Control-Allow-Origin: *');
+        // Set CORS headers with allowed origins
+        $allowedOrigins = explode(',', getenv('ALLOWED_ORIGINS') ?: '');
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        if (in_array($origin, $allowedOrigins)) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+        }
         header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
         header('Access-Control-Allow-Credentials: true');

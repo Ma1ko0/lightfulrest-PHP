@@ -1,29 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Middleware;
 
 use App\Request;
 use App\Logger;
+use Middleware;
 
-class LoggingMiddleware
+class LoggingMiddleware extends Middleware
 {
-    public static function handle(Request $request, callable $next)
+    public function handle(Request $request, callable $next)
     {
         // Log the request
-        Logger::logging(
-            sprintf('Request: %s %s from %s', 
-                $request->getMethod()->value, 
-                $request->getUri(), 
-                $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+        $logger = new Logger();
+        $logger->logging(
+            sprintf(
+                'Request: %s %s from %s',
+                $request->getMethod()->value,
+                $request->getUri(),
+                $_SERVER['REMOTE_ADDR'] ?? 'unknown',
             ),
-            INFO
+            INFO,
         );
 
         // Continue
         $response = $next($request);
 
         // Optionally log response
-        Logger::logging('Request processed', INFO);
+        $logger->logging('Request processed', INFO);
 
         return $response;
     }

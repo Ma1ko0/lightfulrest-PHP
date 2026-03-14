@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use App\User\UserNotFoundException;
@@ -8,16 +10,17 @@ use Methods;
 
 class UserController extends Controller
 {
-	public function getUserDataByID($userId) {
-		$userrepo = new UserRepository();
-		$user = null;
-		try {
-			$user = $userrepo->getUserById($userId);
-		} catch (UserNotFoundException) {
-			Logger::logging("User not found", ERROR);
-			Response::error("User not found", 404);
-		}
-		Logger::logging("User found", INFO);
-		Response::json($user->getUsername(), 200);
-	}
+    public function getUserDataByID(string $userId)
+    {
+        $userrepo = new UserRepository($this->pdo);
+        $user = null;
+        try {
+            $user = $userrepo->getUserById($userId);
+        } catch (UserNotFoundException) {
+            $this->logger->logging("User not found", ERROR);
+            $this->response->error("User not found", 404);
+        }
+        $this->logger->logging("User found", INFO);
+        $this->response->success($user, 200);
+    }
 }

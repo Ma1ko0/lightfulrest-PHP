@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 include_once __DIR__ . "/../src/Class/Router.php";
+include_once __DIR__ . "/../src/Class/Route.php";
 include_once __DIR__ . "/../src/Enums/Methods.php";
 include_once __DIR__ . "/../src/Core/Request.php";
 include_once __DIR__ . "/Fakes/ResponseFake.php";
@@ -8,73 +11,76 @@ include_once __DIR__ . "/Fakes/ResponseFake.php";
 use PHPUnit\Framework\TestCase;
 use App\Router;
 use App\Request;
-use App\Route;
 
 class RouterTest extends TestCase
 {
-	public function testAddStoresRoute()
-	{
-		$router = new Router();
-		$router->add('GET', '/test', function () {
-			return 'ok';
-		});
+    private PDO $pdo;
 
-		$reflection = new \ReflectionClass($router);
-		$prop = $reflection->getProperty('routes');
-		$prop->setAccessible(true);
-		$routes = $prop->getValue($router);
+    protected function setUp(): void
+    {
+        $this->pdo = new PDO('sqlite::memory:');
+    }
+    public function testAddStoresRoute()
+    {
+        $router = new Router($this->pdo);
+        $router->add('GET', '/test', function () {
+            return 'ok';
+        });
 
-		$this->assertCount(1, $routes);
-		$this->assertSame(Methods::GET, $routes[0]['method']);
-		$this->assertSame('#^/test$#', $routes[0]['pattern']);
-	}
+        $reflection = new \ReflectionClass($router);
+        $prop = $reflection->getProperty('routes');
+        $prop->setAccessible(true);
+        $routes = $prop->getValue($router);
 
-	public function testDispatchCallsHandler()
-	{
-		$_SERVER['REQUEST_METHOD'] = 'GET';
-		$_SERVER['REQUEST_URI'] = '/hello/World';
-		$request = new Request();
+        $this->assertCount(1, $routes);
+        $this->assertSame(Methods::GET, $routes[0]['method']);
+        $this->assertSame('#^/test$#', $routes[0]['pattern']);
+    }
 
-		$router = new Router();
-		$router->add('GET', '/hello/(\w+)', function (Request $request, $name) {
-			return "Hello, $name";
-		});
+    public function testDispatchCallsHandler()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/hello/World';
+        $request = new Request();
 
-		$result = $router->dispatch($request);
-		$this->assertSame('Hello, World', $result);
-	}
+        $router = new Router($this->pdo);
+        $router->add('GET', '/hello/(\w+)', function (Request $request, $name) {
+            return "Hello, $name";
+        });
 
-	public function testDispatchUnknownRouteThrows()
-	{
-		$this->expectException(\RuntimeException::class);
-		$this->expectExceptionMessage('Route Not Found');
+        $result = $router->dispatch($request);
+        $this->assertSame('Hello, World', $result);
+    }
 
-		$_SERVER['REQUEST_METHOD'] = 'GET';
-		$_SERVER['REQUEST_URI'] = '/no-such-route';
-		$request = new Request();
+    public function testDispatchUnknownRouteThrows()
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Route Not Found');
 
-		$router = new Router();
-		$router->dispatch($request);
-	}
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/no-such-route';
+        $request = new Request();
 
-	public function testRouteGroupingAppliesPrefix()
-	{
-		include_once __DIR__ . "/../src/Class/Route.php";
-		$router = new Router();
-		Route::setRouter($router);
+        $router = new Router($this->pdo);
+        $router->dispatch($request);
+    }
 
-		Route::group(['prefix' => '/api'], function() {
-			Route::get('/users', function(Request $request) {
-				return 'users';
-			})->register();
-		});
+    public function testRouteGroupingAppliesPrefix()
+    {
+        $router = new Router($this->pdo);
 
-		$reflection = new \ReflectionClass($router);
-		$prop = $reflection->getProperty('routes');
-		$prop->setAccessible(true);
-		$routes = $prop->getValue($router);
+        $router->group(['prefix' => '/api'], function (Router $router) {
+            $router->get('/users', function (Request $request) {
+                return 'users';
+            })->register();
+        });
 
-		$this->assertCount(1, $routes);
-		$this->assertSame('#^/api/users$#', $routes[0]['pattern']);
-	}
+        $reflection = new \ReflectionClass($router);
+        $prop = $reflection->getProperty('routes');
+        $prop->setAccessible(true);
+        $routes = $prop->getValue($router);
+
+        $this->assertCount(1, $routes);
+        $this->assertSame('#^/api/users$#', $routes[0]['pattern']);
+    }
 }

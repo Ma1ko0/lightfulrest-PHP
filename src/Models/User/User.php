@@ -4,70 +4,74 @@ declare(strict_types=1);
 
 namespace App\User;
 
-class User
+use App\Model;
+
+class User extends Model
 {
-	private int $id;
+    protected array $hidden = ['password_hash'];
 
-	private string $username;
+    private int $id;
 
-	private string $email;
+    private string $username;
 
-	private string $password_hash;
+    private string $email;
 
-	private string $createdAt;
+    private string $password_hash;
 
-	private string $updatedAt;
+    private string $createdAt;
+
+    private string $updatedAt;
 
 
-	public function __construct(int $id, string $username, string $email, string $password_hash, ?string $createdAt, ?string $updatedAt)
-	{
-		$this->id = $id;
-		if (empty($id)) {
-			throw new \InvalidArgumentException("ID cannot be empty");
-		}
-		$this->username = strtolower($username);
-		if (empty($this->username)) {
-			throw new \InvalidArgumentException("Username cannot be empty");
-		}
-		$this->email = strtolower($email);
-		if (empty($this->username)) {
-			throw new \InvalidArgumentException("Username cannot be empty");
-		}
-		$this->password_hash = $password_hash;
-		if (empty($this->password_hash)) {
-			throw new \InvalidArgumentException("Password cannot be empty");
-		}
-		$this->createdAt = $createdAt;
-		$this->updatedAt = $updatedAt;
-	}
+    public function __construct(int $id, string $username, string $email, string $password_hash, ?string $createdAt, ?string $updatedAt)
+    {
+        $this->id = $id;
+        if (empty($id)) {
+            throw new \InvalidArgumentException("ID cannot be empty");
+        }
+        $this->username = strtolower($username);
+        if (empty($this->username)) {
+            throw new \InvalidArgumentException("Username cannot be empty");
+        }
+        $this->email = strtolower($email);
+        if (empty($this->username)) {
+            throw new \InvalidArgumentException("Username cannot be empty");
+        }
+        $this->password_hash = $password_hash;
+        if (empty($this->password_hash)) {
+            throw new \InvalidArgumentException("Password cannot be empty");
+        }
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
+    }
 
-	public function getId(): ?int
-	{
-		return $this->id;
-	}
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
-	public function getUsername(): string
-	{
-		return $this->username;
-	}
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
 
-	public function getEmail(): string
-	{
-		return $this->email;
-	}
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
 
-	public function getPasswordHash(): string
-	{
-		return $this->password_hash;
-	}
+    public function getPasswordHash(): string
+    {
+        return $this->password_hash;
+    }
 
-	public function getCreatedAt(): string
-	{
-		return $this->createdAt;
-	}
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
 
-	public function getUpdatedAt(): string
-	{
-		return $this->updatedAt;
-	}
+    public function getUpdatedAt(): string
+    {
+        return $this->updatedAt;
+    }
 }

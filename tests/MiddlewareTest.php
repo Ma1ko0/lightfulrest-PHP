@@ -1,5 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
+require_once __DIR__ . "/../src/Class/Middleware.php";
 include_once __DIR__ . "/../src/Middleware/CorsMiddleware.php";
 include_once __DIR__ . "/../src/Middleware/JsonContentTypeMiddleware.php";
 include_once __DIR__ . "/../src/Middleware/RateLimitMiddleware.php";
@@ -13,6 +16,7 @@ require_once __DIR__ . "/../src/Enums/Methods.php";
 require_once __DIR__ . "/Fakes/ResponseFake.php";
 require_once __DIR__ . "/../src/Class/Repository.php";
 require_once __DIR__ . "/../src/Models/User/UserRepository.php";
+
 
 
 use PHPUnit\Framework\TestCase;
@@ -33,7 +37,7 @@ class MiddlewareTest extends TestCase
         $request = new Request();
 
         ob_start();
-        CorsMiddleware::handle($request, function($req) {
+        new CorsMiddleware()->handle($request, function ($req) {
             echo 'next';
         });
         $output = ob_get_clean();
@@ -49,7 +53,7 @@ class MiddlewareTest extends TestCase
         $request = new Request();
 
         ob_start();
-        JsonContentTypeMiddleware::handle($request, function($req) {
+        new JsonContentTypeMiddleware()->handle($request, function ($req) {
             echo 'ok';
         });
         $output = ob_get_clean();
@@ -67,7 +71,7 @@ class MiddlewareTest extends TestCase
         $_SERVER['CONTENT_TYPE'] = 'text/plain';
         $request = new Request();
 
-        JsonContentTypeMiddleware::handle($request, function($req) {
+        new JsonContentTypeMiddleware()->handle($request, function ($req) {
             // Should not reach here
         });
     }
@@ -80,7 +84,7 @@ class MiddlewareTest extends TestCase
         $request = new Request();
 
         ob_start();
-        RateLimitMiddleware::handle($request, function($req) {
+        new RateLimitMiddleware()->handle($request, function ($req) {
             echo 'allowed';
         });
         $output = ob_get_clean();
@@ -96,7 +100,7 @@ class MiddlewareTest extends TestCase
         $request = new Request();
 
         ob_start();
-        LoggingMiddleware::handle($request, function($req) {
+        new LoggingMiddleware()->handle($request, function ($req) {
             echo 'logged';
         });
         $output = ob_get_clean();
@@ -116,7 +120,7 @@ class MiddlewareTest extends TestCase
         $_SERVER['REQUEST_URI'] = '/test';
         $request = new Request();
 
-        SessionMiddleware::handle($request, function($req) {
+        new SessionMiddleware()->handle($request, function ($req) {
             return 'session started';
         });
 
@@ -128,7 +132,7 @@ class MiddlewareTest extends TestCase
         // Set up JWT environment variables for testing
         $_ENV['JWT_SECRET'] = 'test-jwt-secret-key-that-is-long-enough-for-hs256-algorithm-32-bytes-minimum';
         $_ENV['JWT_ALGORITHM'] = 'HS256';
-        
+
         // Generate a valid JWT token for testing (without user_id to skip user validation)
         $payload = ['username' => 'testuser', 'role' => 'admin'];
         $token = RestAuthMiddleware::generateToken($payload, 1); // 1 hour expiration
@@ -139,7 +143,7 @@ class MiddlewareTest extends TestCase
         $request = new Request();
 
         ob_start();
-        RestAuthMiddleware::handle($request, function($req) {
+        new RestAuthMiddleware()->handle($request, function ($req) {
             echo 'authenticated';
         });
         $output = ob_get_clean();
@@ -157,7 +161,7 @@ class MiddlewareTest extends TestCase
         unset($_SERVER['HTTP_AUTHORIZATION']);
         $request = new Request();
 
-        RestAuthMiddleware::handle($request, function($req) {
+        new RestAuthMiddleware()->handle($request, function ($req) {
             // Should not reach
         });
     }

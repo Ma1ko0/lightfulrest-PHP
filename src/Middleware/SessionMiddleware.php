@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Middleware;
 
 use App\Request;
+use Middleware;
 
-class SessionMiddleware
+class SessionMiddleware extends Middleware
 {
-    public static function handle(Request $request, callable $next)
+    public function handle(Request $request, callable $next)
     {
         // Start session if not already started
         if (session_status() === PHP_SESSION_NONE) {

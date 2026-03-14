@@ -1,20 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Middleware;
 
 use App\Request;
 use App\Response;
-use App\User\UserRepository;
+use Database;
 use Exception;
+use Middleware;
 
-class RestAuthMiddleware
+class RestAuthMiddleware extends Middleware
 {
-    public static function handle(Request $request, callable $next)
+    public function handle(Request $request, callable $next)
     {
         // Check for Authorization header
         $authHeader = $request->getHeaders('Authorization');
         if (!$authHeader) {
-            Response::error('Authorization header required', 401);
+            new Response()->error('Authorization header required', 401);
             return;
         }
 
@@ -23,11 +26,11 @@ class RestAuthMiddleware
             $token = $matches[1];
             // Validate token (placeholder - implement JWT or API key validation)
             if (!self::validateToken($token)) {
-                Response::error('Invalid token', 401);
+                new Response()->error('Invalid token', 401);
                 return;
             }
         } else {
-            Response::error('Invalid Authorization format', 401);
+            new Response()->error('Invalid Authorization format', 401);
             return;
         }
 
@@ -45,12 +48,12 @@ class RestAuthMiddleware
         try {
             $algorithm = self::getAlgorithm();
             $key = self::getSecretKey();
-            
+
             if (in_array($algorithm, ['RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512'])) {
                 // For asymmetric algorithms, we need the public key
                 $key = self::getPublicKey();
             }
-            
+
             $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key($key, $algorithm));
 
             // Check if token is expired
@@ -81,9 +84,9 @@ class RestAuthMiddleware
         return $_ENV['JWT_SECRET'] ?? 'your-secret-key-change-this-in-production';
     }
 
-    private static function isUserValid(int $userId): bool
+    private static function isUserValid(string $userId): bool
     {
-        $userRepo = new \App\User\UserRepository();
+        $userRepo = new \App\User\UserRepository(new Database()->getConnection());
         try {
             $user = $userRepo->getUserById($userId);
             return $user !== null;
@@ -116,7 +119,7 @@ class RestAuthMiddleware
 
         $algorithm = self::getAlgorithm();
         $key = self::getPrivateKey();
-        
+
         return \Firebase\JWT\JWT::encode($payload, $key, $algorithm);
     }
 }
