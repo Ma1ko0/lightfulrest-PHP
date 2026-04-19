@@ -28,6 +28,7 @@ services:
             JWT_ALGORITHM: ${JWT_ALGORITHM}
             JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
             JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+            ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
         ports:
             - "8080:8080"
         volumes:

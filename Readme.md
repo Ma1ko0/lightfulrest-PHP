@@ -31,6 +31,7 @@ If you need a lightweight foundation to build your project, this framework gives
 - **PDO Database Interaction**: Secure database operations using a custom query builder and PDO.
 - **Environment Configuration**: Supports `.env` files for environment-specific settings (database, JWT, logging, etc.).
 - **Error Handling**: Centralized error and exception handling with appropriate HTTP status codes.
+- **Response Methods**: Support for JSON, success, error, text, redirect, and empty responses.
 - **PSR-4 Autoloading**: Automatically loads classes based on the PSR-4 autoloading standard.
 - **Logging**: Built-in logging for tracking application events and debugging.
 - **Docker Support**: Ready-to-use docker-compose setup for development and deployment.
@@ -94,11 +95,12 @@ DB_PASSWORD=12345678
 DEBUG_MODE=true
 TIMEZONE=Europe/Berlin
 LOCALE=de_DE
-LOG_LEVEL=ERROR,WARN,DEBUG
+LOG_LEVEL=ERROR,WARN
+ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
 
 # JWT Authentication (choose algorithm and configure accordingly)
 JWT_ALGORITHM=HS256
-JWT_SECRET=your-super-secure-jwt-secret-key-change-this-in-production
+JWT_SECRET=your-super-secure-jwt-secret-key-change-this-in-production-2026
 # For asymmetric algorithms (RS256, ES256), use these instead:
 # JWT_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----
 # JWT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----
@@ -165,9 +167,9 @@ $token = RestAuthMiddleware::generateToken($payload, 24); // 24 hours expiration
 
 ```php
 // In src/Core/Routes.php
-Route::group(['middleware' => [RestAuthMiddleware::class]], function() {
-    Route::get('/api/profile', [UserController::class, 'getProfile']);
-    Route::post('/api/users', [UserController::class, 'createUser']);
+$router->group(['middleware' => [RestAuthMiddleware::class]], function() {
+    $router->get('/api/profile', [UserController::class, 'getProfile']);
+    $router->post('/api/users', [UserController::class, 'createUser']);
 });
 ```
 
@@ -196,23 +198,24 @@ The framework includes a comprehensive middleware system for request processing.
 **Available Middleware:**
 
 - `RestAuthMiddleware` - JWT token authentication
-- `AuthMiddleware` - Session-based authentication
 - `CorsMiddleware` - Cross-Origin Resource Sharing headers
 - `JsonContentTypeMiddleware` - Validates JSON content-type
 - `LoggingMiddleware` - Request logging
 - `RateLimitMiddleware` - API rate limiting
+- `SecurityHeadersMiddleware` - Adds security headers to responses
 - `SessionMiddleware` - Session management
+- `ValidationMiddleware` - Input validation
 
 **Using Middleware:**
 
 ```php
 // Apply to all routes in a group
-Route::group(['middleware' => [LoggingMiddleware::class, RateLimitMiddleware::class]], function() {
-    Route::get('/api/users', [UserController::class, 'getUsers']);
+$router->group(['middleware' => [LoggingMiddleware::class, RateLimitMiddleware::class]], function() {
+    $router->get('/api/users', [UserController::class, 'getUsers']);
 });
 
 // Apply to specific routes
-Route::get('/api/admin', [AdminController::class, 'dashboard'])
+$router->get('/api/admin', [AdminController::class, 'dashboard'])
     ->middleware([RestAuthMiddleware::class])
     ->register();
 ```
@@ -224,14 +227,16 @@ Route::get('/api/admin', [AdminController::class, 'dashboard'])
 namespace App\Middleware;
 
 use App\Request;
+use App\Response;
 
-class CustomMiddleware
+class CustomMiddleware extends Middleware
 {
-    public static function handle(Request $request, callable $next)
+    public function handle(Request $request, callable $next)
     {
         // Pre-processing logic
         if (/* some condition */) {
-            Response::error('Access denied', 403);
+            $response = new Response();
+            $response->error('Access denied', 403);
             return;
         }
         
@@ -253,31 +258,32 @@ use App\Route;
 use App\UserController;
 
 // Simple routes
-Route::get('/hello', function(Request $request) {
-    return Response::json(['message' => 'Hello, World!']);
+$router->get('/hello', function(Request $request) {
+    $response = new Response();
+    $response->json(['message' => 'Hello, World!']);
 })->register();
 
 // Routes with parameters
-Route::get('/users/(\d+)', [UserController::class, 'getUserDataByID'])->register();
+$router->get('/users/(\d+)', [UserController::class, 'getUserDataByID'])->register();
 
 // Different HTTP methods
-Route::post('/users', [UserController::class, 'createUser'])->register();
-Route::put('/users/(\d+)', [UserController::class, 'updateUser'])->register();
-Route::delete('/users/(\d+)', [UserController::class, 'deleteUser'])->register();
+$router->post('/users', [UserController::class, 'createUser'])->register();
+$router->put('/users/(\d+)', [UserController::class, 'updateUser'])->register();
+$router->delete('/users/(\d+)', [UserController::class, 'deleteUser'])->register();
 ```
 
 **Route Grouping with Middleware:**
 
 ```php
 // Group routes with common middleware and prefixes
-Route::group(['prefix' => '/api', 'middleware' => [LoggingMiddleware::class]], function() {
-    Route::get('/users', [UserController::class, 'getUsers'])->register();
-    Route::get('/users/(\d+)', [UserController::class, 'getUserDataByID'])->register();
+$router->group(['prefix' => '/api', 'middleware' => [LoggingMiddleware::class]], function() {
+    $router->get('/users', [UserController::class, 'getUsers'])->register();
+    $router->get('/users/(\d+)', [UserController::class, 'getUserDataByID'])->register();
     
     // Nested groups
-    Route::group(['middleware' => [RestAuthMiddleware::class]], function() {
-        Route::post('/users', [UserController::class, 'createUser'])->register();
-        Route::put('/users/(\d+)', [UserController::class, 'updateUser'])->register();
+    $router->group(['middleware' => [RestAuthMiddleware::class]], function() {
+        $router->post('/users', [UserController::class, 'createUser'])->register();
+        $router->put('/users/(\d+)', [UserController::class, 'updateUser'])->register();
     });
 });
 ```
@@ -286,7 +292,7 @@ Route::group(['prefix' => '/api', 'middleware' => [LoggingMiddleware::class]], f
 
 ```php
 // Apply middleware to individual routes
-Route::post('/login', [AuthController::class, 'login'])
+$router->post('/login', [AuthController::class, 'login'])
     ->middleware([RateLimitMiddleware::class])
     ->register();
 ```
@@ -309,14 +315,64 @@ Use the custom query builder for secure and flexible database operations.
 **Example: Fetching a User by ID**
 
 ```php
+// In a controller method
 $userRepo = new UserRepository();
 $user = $userRepo->getUserById($userId);
 
 if ($user) {
-    Response::json($user->getUsername(), 200);
+    $this->response->json($user->getUsername(), 200);
 } else {
-    Response::error("User not found", 404);
+    $this->response->error("User not found", 404);
 }
+```
+
+---
+
+### Response
+
+The framework provides various response methods for different output formats and scenarios.
+
+**JSON Response:**
+
+```php
+$response = new Response();
+$response->json(['key' => 'value'], 200);
+```
+
+**Success Response:**
+
+```php
+$response = new Response();
+$response->success(['username' => 'john_doe'], 200);
+// Outputs: {"status": "success", "data": {"username": "john_doe"}, "timestamp": "2026-03-19T01:09:23.374+00:00"}
+```
+
+**Error Response:**
+
+```php
+$response = new Response();
+$response->error('Not found', 404);
+```
+
+**Text Response:**
+
+```php
+$response = new Response();
+$response->text('Hello World', 200);
+```
+
+**Redirect:**
+
+```php
+$response = new Response();
+$response->redirect('/login', 302);
+```
+
+**Empty Response:**
+
+```php
+$response = new Response();
+$response->empty(204);
 ```
 
 ---
@@ -328,7 +384,8 @@ Errors and exceptions are handled centrally. Logging is configurable via the `.e
 **Example: Logging an Event**
 
 ```php
-Logger::logging("User login attempt", INFO);
+$logger = new Logger();
+$logger->logging("User login attempt", INFO);
 ```
 
 **Example: Handling an Error**
@@ -371,7 +428,8 @@ class ExampleTest extends TestCase
         $request = new Request();
 
         ob_start();
-        ExampleMiddleware::handle($request, function($req) {
+        $middleware = new ExampleMiddleware();
+        $middleware->handle($request, function ($req) {
             echo 'success';
         });
         $output = ob_get_clean();
@@ -403,7 +461,6 @@ class ExampleTest extends TestCase
 
 - **Expanded Documentation**: More detailed usage examples and API documentation.
 - **Better Request Validation**: Built-in validation for incoming request data (required fields, types, formats).
-- **Response Formatting**: Support for multiple response formats (e.g., JSON, XML).
 - **API Documentation Generator**: Automatic generation of OpenAPI/Swagger documentation from controllers.
 - **Caching**: Support for caching responses or database queries to improve performance.
 - **File Upload Handling**: Secure file upload and storage utilities.

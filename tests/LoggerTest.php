@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 include_once __DIR__ . "/../src/Core/Logger.php";
 
 use PHPUnit\Framework\TestCase;
@@ -33,7 +35,7 @@ final class LoggerTest extends TestCase
     public function testLoggingWritesError(): void
     {
         Logger::setLevel(ERROR);
-        Logger::logging("Test error message", ERROR, false);
+        new Logger()->logging("Test error message", ERROR, false);
 
         $logFile = $this->tempLogDir . '/' . date('Y-m-d') . '.log';
         $this->assertFileExists($logFile);
@@ -46,7 +48,7 @@ final class LoggerTest extends TestCase
     public function testLoggingDoesNotWriteWhenLevelFiltered(): void
     {
         Logger::setLevel(WARN); // ERROR not included
-        Logger::logging("This should not appear", ERROR);
+        new Logger()->logging("This should not appear", ERROR);
 
         $logFile = $this->tempLogDir . '/' . date('Y-m-d') . '.log';
         $this->assertFileDoesNotExist($logFile);
@@ -55,7 +57,7 @@ final class LoggerTest extends TestCase
     public function testLoggingIncludesBacktraceWhenRequested(): void
     {
         Logger::setLevel(ERROR);
-        Logger::logging("Backtrace test", ERROR, true);
+        new Logger()->logging("Backtrace test", ERROR, true);
 
         $logFile = $this->tempLogDir . '/' . date('Y-m-d') . '.log';
         $contents = file_get_contents($logFile);
